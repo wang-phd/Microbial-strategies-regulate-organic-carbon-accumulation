@@ -1,0 +1,46 @@
+rm(list=ls())
+#调用R包
+library(tidyverse)
+library(microeco)
+library(magrittr)
+#读取数据
+otu <-  read.csv(file.choose(), row.names = 1)
+group <-  read.csv(file.choose(), row.names = 1)
+tax <-  read.csv(file.choose(), row.names = 1)
+#创建microeco包可识别的对象
+dataset <- microtable$new(sample_table = group,
+                          otu_table = otu, 
+                          tax_table = tax)
+dataset
+
+#开始LEfse分析
+lefse <- trans_diff$new(dataset = dataset, 
+                        method = "lefse", 
+                        group = "Group", 
+                        alpha = 0.01, 
+                        lefse_subgroup = NULL)
+# 查看分析结果
+head(lefse$res_diff)
+
+
+# 绘制前30个具有最高LDA（log10）的分类单元的差异特征柱状图
+lefse$plot_diff_bar(use_number = 1:30, 
+                    width = 0.8, 
+                    group_order = c("P700", "P500", "P200","P50"))
+
+
+# 展示前200个分类单元和前50个特征
+lefse$plot_diff_cladogram(use_taxa_num = 200, 
+                          use_feature_num = 25, 
+                          clade_label_level = 5, 
+                          group_order = c("P700", "P500", "P200","P50"))
+
+#进一步根据自己的需求美化图片
+use_labels <- c("c__Deltaproteobacteria", "c__Actinobacteria", "o__Rhizobiales", "p__Proteobacteria", "p__Bacteroidetes", 
+                "o__Micrococcales", "p__Acidobacteria", "p__Verrucomicrobia", "p__Firmicutes", 
+                "p__Chloroflexi", "c__Acidobacteria", "c__Gammaproteobacteria", "c__Betaproteobacteria", "c__KD4-96",
+                "c__Bacilli", "o__Gemmatimonadales", "f__Gemmatimonadaceae", "o__Bacillales", "o__Rhodobacterales")
+# then use parameter select_show_labels to show
+lefse$plot_diff_cladogram(use_taxa_num = 200, 
+                          use_feature_num = 50, 
+                          select_show_labels = use_labels)
